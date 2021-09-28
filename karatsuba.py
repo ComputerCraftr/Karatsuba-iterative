@@ -16,17 +16,19 @@ def karatsuba_calculation_inner(multiplicand, multiplier):
 
     # Use hash map instead of repeatedly calculating powers of 10
     if m in karatsuba_calculation_inner.power_map:
-        digit_shift = karatsuba_calculation_inner.power_map[m]
+        m_digit_shift = karatsuba_calculation_inner.power_map[m][0]
+        m2_digit_shift = karatsuba_calculation_inner.power_map[m][1]
     else:
-        digit_shift = 10 ** m2
-        karatsuba_calculation_inner.power_map[m] = digit_shift
+        m_digit_shift = 10 ** m
+        m2_digit_shift = 10 ** m2
+        karatsuba_calculation_inner.power_map[m] = (m_digit_shift, m2_digit_shift)
 
-    high1 = multiplicand // digit_shift
-    low1 = multiplicand % digit_shift
-    high2 = multiplier // digit_shift
-    low2 = multiplier % digit_shift
+    high1 = multiplicand // m2_digit_shift
+    low1 = multiplicand % m2_digit_shift
+    high2 = multiplier // m2_digit_shift
+    low2 = multiplier % m2_digit_shift
 
-    return [m, digit_shift, high1, low1, high2, low2]
+    return [m_digit_shift, m2_digit_shift, high1, low1, high2, low2]
 
 
 # Declare static dictionary variable for function above
@@ -58,8 +60,8 @@ def karatsuba_multiply_iterative(multiplicand, multiplier):
         if multiplicand_temp >= 10 and multiplier_temp >= 10:
             result = karatsuba_calculation_inner(multiplicand_temp, multiplier_temp)
 
-            second_stack[-1][2] = result[0]  # m
-            second_stack[-1][3] = result[1]  # digit_shift
+            second_stack[-1][2] = result[0]  # m_digit_shift
+            second_stack[-1][3] = result[1]  # m2_digit_shift
 
             high1 = result[2]
             low1 = result[3]
@@ -102,14 +104,14 @@ def karatsuba_multiply_iterative(multiplicand, multiplier):
             last_branch = branch_path.pop()
             m_pair = m_stack.pop()
 
-            m = m_pair[0]
-            digit_shift = m_pair[1]
+            m_digit_shift = m_pair[0]
+            m2_digit_shift = m_pair[1]
             z0 = z_stack[0].pop()
             z1 = z_stack[1].pop()
             z2 = z_stack[2].pop()
 
             # print('z0 = ' + str(z0) + ' z1 = ' + str(z1) + ' z2 = ' + str(z2))
-            result = (z2 * 10 ** m) + ((z1 - z2 - z0) * digit_shift) + z0
+            result = (z2 * m_digit_shift) + ((z1 - z2 - z0) * m2_digit_shift) + z0
             z_stack[last_branch].append(result)
 
     # The final result is pushed onto the left z0 stack, so we return it here
@@ -123,8 +125,8 @@ def karatsuba_multiply_recursive(multiplicand, multiplier):
 
     result = karatsuba_calculation_inner(multiplicand, multiplier)
 
-    m = result[0]
-    digit_shift = result[1]
+    m_digit_shift = result[0]
+    m2_digit_shift = result[1]
 
     high1 = result[2]
     low1 = result[3]
@@ -136,7 +138,7 @@ def karatsuba_multiply_recursive(multiplicand, multiplier):
     z2 = karatsuba_multiply_recursive(high1, high2)
 
     # print('z0 = ' + str(z0) + ' z1 = ' + str(z1) + ' z2 = ' + str(z2))
-    return (z2 * 10 ** m) + ((z1 - z2 - z0) * digit_shift) + z0
+    return (z2 * m_digit_shift) + ((z1 - z2 - z0) * m2_digit_shift) + z0
 
 
 # Compare results
