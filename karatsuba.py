@@ -10,18 +10,15 @@ Iterative Karatsuba multiplication algorithm
 def karatsuba_calculation_inner(multiplicand, multiplier):
     m = min(len(str(multiplicand)), len(str(multiplier)))
     m2 = m // 2
-    # If m is odd then subtract one to make it equal to 2 * m2 for use in the final calculation
-    if m & 1:
-        m -= 1
 
     # Use hash map instead of repeatedly calculating powers of 10
-    if m in karatsuba_calculation_inner.power_map:
-        m_digit_shift = karatsuba_calculation_inner.power_map[m][0]
-        m2_digit_shift = karatsuba_calculation_inner.power_map[m][1]
+    if m2 in karatsuba_calculation_inner.power_map:
+        m_digit_shift = karatsuba_calculation_inner.power_map[m2][0]
+        m2_digit_shift = karatsuba_calculation_inner.power_map[m2][1]
     else:
-        m_digit_shift = 10 ** m
         m2_digit_shift = 10 ** m2
-        karatsuba_calculation_inner.power_map[m] = (m_digit_shift, m2_digit_shift)
+        m_digit_shift = m2_digit_shift * m2_digit_shift  # 10 ** m = 10 ** (2 * m2) = (10 ** m2) ** 2
+        karatsuba_calculation_inner.power_map[m2] = (m_digit_shift, m2_digit_shift)
 
     high1 = multiplicand // m2_digit_shift
     low1 = multiplicand % m2_digit_shift
