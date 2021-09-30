@@ -7,18 +7,18 @@ Iterative Karatsuba multiplication algorithm
 """
 
 
-def karatsuba_calculation_inner(multiplicand, multiplier):
+def karatsuba_split_inputs(multiplicand, multiplier):
     m = min(len(str(multiplicand)), len(str(multiplier)))
     m2 = m // 2
 
     # Use hash map instead of repeatedly calculating powers of 10
-    if m2 in karatsuba_calculation_inner.power_map:
-        m_digit_shift = karatsuba_calculation_inner.power_map[m2][0]
-        m2_digit_shift = karatsuba_calculation_inner.power_map[m2][1]
+    if m2 in karatsuba_split_inputs.power_map:
+        m_digit_shift = karatsuba_split_inputs.power_map[m2][0]
+        m2_digit_shift = karatsuba_split_inputs.power_map[m2][1]
     else:
         m2_digit_shift = 10 ** m2
         m_digit_shift = m2_digit_shift * m2_digit_shift  # 10 ** m = 10 ** (2 * m2) = (10 ** m2) ** 2
-        karatsuba_calculation_inner.power_map[m2] = (m_digit_shift, m2_digit_shift)
+        karatsuba_split_inputs.power_map[m2] = (m_digit_shift, m2_digit_shift)
 
     high1 = multiplicand // m2_digit_shift
     low1 = multiplicand % m2_digit_shift
@@ -29,67 +29,55 @@ def karatsuba_calculation_inner(multiplicand, multiplier):
 
 
 # Declare static dictionary variable for function above
-karatsuba_calculation_inner.power_map = dict()
+karatsuba_split_inputs.power_map = dict()
 
 
 def karatsuba_multiply_iterative(multiplicand, multiplier):
-    # Calculate multiplicand * multiplier
-    if multiplicand < 10 or multiplier < 10:
-        return multiplicand * multiplier
-
-    # The first stack holds the input arguments to the Karatsuba multiplication function along with the branch of each
+    # The node stack holds the input arguments to the Karatsuba multiplication function along with the branch of each
     # node in the tree with respect to its parent
-    first_stack = [[multiplicand, multiplier, 0]]  # Assign root node with left branch 0
-    # The second stack also holds the function input arguments and some intermediary results to avoid performing repeat
-    # calculations below along with the branch of the node
-    second_stack = []
+    node_stack = [[multiplicand, multiplier, 0]]  # Assign root node with left branch 0
 
-    # Perform the tree traversal using two stacks - since the recursive Karatsuba multiplication function calls itself
-    # three times, this will be a ternary tree
-    while first_stack:
-        current_node = first_stack.pop()
-        multiplicand_temp = current_node[0]
-        multiplier_temp = current_node[1]
-        branch = current_node[2]
-        second_stack.append([multiplicand_temp, multiplier_temp, 0, 0, branch])
-
-        # Note: every node here is guaranteed to have 3 children if it is not a leaf
-        if multiplicand_temp >= 10 and multiplier_temp >= 10:
-            result = karatsuba_calculation_inner(multiplicand_temp, multiplier_temp)
-
-            second_stack[-1][2] = result[0]  # m_digit_shift
-            second_stack[-1][3] = result[1]  # m2_digit_shift
-
-            high1 = result[2]
-            low1 = result[3]
-            high2 = result[4]
-            low2 = result[5]
-
-            # The last appended values here are traversed first due to the last in first out nature of stacks
-            first_stack.append([high1, high2, 2])  # z2 - right
-            first_stack.append([low1 + high1, low2 + high2, 1])  # z1 - center
-            first_stack.append([low1, low2, 0])  # z0 - left
-
+    # These stacks hold the results of lower depth calculations and maintain information about which higher order
+    # calculations they belong to
     branch_path = []
     m_stack = []
     z_stack = [[], [], []]
     leaf_count = 0
 
-    for k in range(len(second_stack)):
-        current_node = second_stack[k]
-        m_temp = current_node[2]
-        branch = current_node[4]
+    # Perform the tree traversal and calculate the results - since the recursive Karatsuba multiplication function calls
+    # itself three times, this will be a ternary tree
+    while node_stack:
+        current_node = node_stack.pop()
+        multiplicand_temp = current_node[0]
+        multiplier_temp = current_node[1]
+        branch = current_node[2]
+        current_node_updated = [multiplicand_temp, multiplier_temp, 0, 0, branch]
 
-        # m is nonzero for every node which has children (non leaf nodes)
-        if m_temp != 0:
+        # Note: every node here is guaranteed to have 3 children if it is not a leaf
+        if multiplicand_temp >= 10 and multiplier_temp >= 10:
+            intermediate_results = karatsuba_split_inputs(multiplicand_temp, multiplier_temp)
+
+            current_node_updated[2] = intermediate_results[0]  # m_digit_shift
+            current_node_updated[3] = intermediate_results[1]  # m2_digit_shift
+
+            high1 = intermediate_results[2]
+            low1 = intermediate_results[3]
+            high2 = intermediate_results[4]
+            low2 = intermediate_results[5]
+
+            # The last appended values here are traversed first due to the last in first out nature of stacks
+            node_stack.append([high1, high2, 2])  # z2 - right
+            node_stack.append([low1 + high1, low2 + high2, 1])  # z1 - center
+            node_stack.append([low1, low2, 0])  # z0 - left
+
             # The branch path and m stacks implicitly keep track of node depth while we are performing calculations
             branch_path.append(branch)
-            m_stack.append(current_node[2:4])
+            m_stack.append(current_node_updated[2:4])
             leaf_count = 0
         else:
             # Leaf nodes are all single digit multiplications
             # Calculate multiplicand * multiplier
-            z_stack[leaf_count].append(current_node[0] * current_node[1])
+            z_stack[leaf_count].append(current_node_updated[0] * current_node_updated[1])
 
             # We take advantage of the fact that, while the child nodes can have additional branches at lower depths on
             # the center or center and right nodes, the left node will always be a leaf
@@ -121,15 +109,15 @@ def karatsuba_multiply_recursive(multiplicand, multiplier):
     if multiplicand < 10 or multiplier < 10:
         return multiplicand * multiplier
 
-    result = karatsuba_calculation_inner(multiplicand, multiplier)
+    intermediate_results = karatsuba_split_inputs(multiplicand, multiplier)
 
-    m_digit_shift = result[0]
-    m2_digit_shift = result[1]
+    m_digit_shift = intermediate_results[0]
+    m2_digit_shift = intermediate_results[1]
 
-    high1 = result[2]
-    low1 = result[3]
-    high2 = result[4]
-    low2 = result[5]
+    high1 = intermediate_results[2]
+    low1 = intermediate_results[3]
+    high2 = intermediate_results[4]
+    low2 = intermediate_results[5]
 
     z0 = karatsuba_multiply_recursive(low1, low2)
     z1 = karatsuba_multiply_recursive(low1 + high1, low2 + high2)
