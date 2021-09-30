@@ -51,14 +51,13 @@ def karatsuba_multiply_iterative(multiplicand, multiplier):
         multiplicand_temp = current_node[0]
         multiplier_temp = current_node[1]
         branch = current_node[2]
-        current_node_updated = [multiplicand_temp, multiplier_temp, 0, 0, branch]
 
         # Note: every node here is guaranteed to have 3 children if it is not a leaf
         if multiplicand_temp >= 10 and multiplier_temp >= 10:
             intermediate_results = karatsuba_split_inputs(multiplicand_temp, multiplier_temp)
 
-            current_node_updated[2] = intermediate_results[0]  # m_digit_shift
-            current_node_updated[3] = intermediate_results[1]  # m2_digit_shift
+            m_digit_shift_temp = intermediate_results[0]
+            m2_digit_shift_temp = intermediate_results[1]
 
             high1 = intermediate_results[2]
             low1 = intermediate_results[3]
@@ -72,12 +71,12 @@ def karatsuba_multiply_iterative(multiplicand, multiplier):
 
             # The branch path and m stacks implicitly keep track of node depth while we are performing calculations
             branch_path.append(branch)
-            m_stack.append(current_node_updated[2:4])
+            m_stack.append([m_digit_shift_temp, m2_digit_shift_temp])
             leaf_count = 0
         else:
             # Leaf nodes are all single digit multiplications
             # Calculate multiplicand * multiplier
-            z_stack[leaf_count].append(current_node_updated[0] * current_node_updated[1])
+            z_stack[leaf_count].append(multiplicand_temp * multiplier_temp)
 
             # We take advantage of the fact that, while the child nodes can have additional branches at lower depths on
             # the center or center and right nodes, the left node will always be a leaf
@@ -92,6 +91,7 @@ def karatsuba_multiply_iterative(multiplicand, multiplier):
 
             m_digit_shift = m_pair[0]
             m2_digit_shift = m_pair[1]
+
             z0 = z_stack[0].pop()
             z1 = z_stack[1].pop()
             z2 = z_stack[2].pop()
