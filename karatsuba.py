@@ -136,13 +136,3 @@ def karatsuba_multiply_recursive(multiplicand, multiplier):
 
     # print('z0 = ' + str(z0) + ' z1 = ' + str(z1) + ' z2 = ' + str(z2))
     return (z2 * m_digit_shift) + ((z1 - z2 - z0) * m2_digit_shift) + z0
-
-
-# Compare results
-multi_list = [[189, 811], [716751, 643108], [5629806318, 846726235]]
-
-for j in range(len(multi_list)):
-    print(str(multi_list[j][0]) + ' * ' + str(multi_list[j][1]) + ' =')
-    print('Long multiplication:', multi_list[j][0] * multi_list[j][1])
-    print('Karatsuba recursive:', karatsuba_multiply_recursive(multi_list[j][0], multi_list[j][1]))
-    print('Karatsuba iterative:', karatsuba_multiply_iterative(multi_list[j][0], multi_list[j][1]))
