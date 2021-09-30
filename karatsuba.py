@@ -93,7 +93,8 @@ def karatsuba_multiply_iterative(multiplicand, multiplier):
 
             # We take advantage of the fact that, while the child nodes can have additional branches at lower depths on
             # the center or center and right nodes, the left node will always be a leaf
-            leaf_count = min(leaf_count + 1, 2)
+            if leaf_count != 2:
+                leaf_count += 1
 
         # We only need to check if the z2 stack is not empty here because the right z2 branch is always traversed last
         # and this implies that the z0 and z1 stacks are also not empty, meaning there are still calculations to perform
