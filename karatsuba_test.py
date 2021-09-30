@@ -13,6 +13,8 @@ import time
 # Generate deterministic random testing data
 random.seed(1)
 multi_list = []
+iterative_results = []
+recursive_results = []
 
 max_digits = 251
 for j in range(2, max_digits, 1):
@@ -22,15 +24,16 @@ for j in range(2, max_digits, 1):
 
 start = time.process_time()
 for multi_pair in multi_list:
-    karatsuba.karatsuba_multiply_iterative(multi_pair[0], multi_pair[1])
+    iterative_results.append(karatsuba.karatsuba_multiply_iterative(multi_pair[0], multi_pair[1]))
 end = time.process_time()
 print('Iterative algo time elapsed:', end - start)
 
 start = time.process_time()
 for multi_pair in multi_list:
-    karatsuba.karatsuba_multiply_recursive(multi_pair[0], multi_pair[1])
+    recursive_results.append(karatsuba.karatsuba_multiply_recursive(multi_pair[0], multi_pair[1]))
 end = time.process_time()
 print('Recursive algo time elapsed:', end - start)
+print('Results match:', iterative_results == recursive_results)
 
 test_element = max_digits // 4
 print(str(multi_list[test_element][0]) + ' * ' + str(multi_list[test_element][1]) + ' =')
