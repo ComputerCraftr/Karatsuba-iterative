@@ -8,8 +8,7 @@ Iterative Karatsuba multiplication algorithm
 
 
 def karatsuba_split_inputs(multiplicand, multiplier):
-    m = min(len(str(multiplicand)), len(str(multiplier)))
-    m2 = m // 2
+    m2 = min(len(str(multiplicand)), len(str(multiplier))) // 2  # m // 2
 
     # Use hash map instead of repeatedly calculating powers of 10
     if m2 in karatsuba_split_inputs.power_map:
