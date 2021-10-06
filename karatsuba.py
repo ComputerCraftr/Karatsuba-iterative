@@ -22,7 +22,7 @@ def integer_digits_base256(number):
 
 
 def karatsuba_split_inputs(multiplicand, multiplier):
-    m2 = min(integer_digits_base256(multiplicand), integer_digits_base256(multiplier)) // 2  # m // 2
+    m2 = min(integer_digits_base256(multiplicand), integer_digits_base256(multiplier)) >> 1  # m // 2
 
     m2_digit_shift = 1 << (8 * m2)  # 1 << (8 * m2) = 2 ** (8 * m2) = 256 ** m2
     m_digit_shift = 1 << (16 * m2)  # m2_digit_shift * m2_digit_shift
