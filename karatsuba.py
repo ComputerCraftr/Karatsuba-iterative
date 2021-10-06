@@ -24,14 +24,8 @@ def integer_digits_base256(number):
 def karatsuba_split_inputs(multiplicand, multiplier):
     m2 = min(integer_digits_base256(multiplicand), integer_digits_base256(multiplier)) // 2  # m // 2
 
-    # Use hash map instead of repeatedly calculating powers of number_base
-    if m2 in karatsuba_split_inputs.power_map:
-        m_digit_shift = karatsuba_split_inputs.power_map[m2][0]
-        m2_digit_shift = karatsuba_split_inputs.power_map[m2][1]
-    else:
-        m2_digit_shift = 1 << (8 * m2)  # 1 << (8 * m2) = 2 ** (8 * m2) = 256 ** m2
-        m_digit_shift = 1 << (16 * m2)  # m2_digit_shift * m2_digit_shift
-        karatsuba_split_inputs.power_map[m2] = (m_digit_shift, m2_digit_shift)
+    m2_digit_shift = 1 << (8 * m2)  # 1 << (8 * m2) = 2 ** (8 * m2) = 256 ** m2
+    m_digit_shift = 1 << (16 * m2)  # m2_digit_shift * m2_digit_shift
 
     high1 = multiplicand // m2_digit_shift
     low1 = multiplicand % m2_digit_shift
@@ -39,10 +33,6 @@ def karatsuba_split_inputs(multiplicand, multiplier):
     low2 = multiplier % m2_digit_shift
 
     return [m_digit_shift, m2_digit_shift, high1, low1, high2, low2]
-
-
-# Declare static dictionary variable for function above
-karatsuba_split_inputs.power_map = dict()
 
 
 def karatsuba_multiply_iterative(multiplicand, multiplier):

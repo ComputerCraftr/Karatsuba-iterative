@@ -16,14 +16,9 @@ multi_list = []
 iterative_results = []
 recursive_results = []
 
-start = time.process_time()
 max_digits = 251
 for j in range(2, max_digits, 1):
     multi_list.append([random.randint(10, 10 ** j), random.randint(10, 10 ** j)])
-    # Build power map
-    karatsuba.karatsuba_multiply_recursive(multi_list[-1][0], multi_list[-1][1])
-end = time.process_time()
-print('Building power map time elapsed:', end - start)
 
 start = time.process_time()
 for multi_pair in multi_list:
