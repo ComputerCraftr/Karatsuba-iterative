@@ -6,17 +6,31 @@ file COPYING or http://www.opensource.org/licenses/mit-license.php.
 Iterative Karatsuba multiplication algorithm
 """
 
+number_base = 256
+
+
+# Base 256 is one byte per digit
+def integer_digits_base256(number):
+    digits = 0
+
+    # Divide by 256 until the number is rounded down to zero
+    while number > 0:
+        digits += 1
+        number >>= 8  # Right shifting by 8 bits is equivalent to dividing by 256
+
+    return digits
+
 
 def karatsuba_split_inputs(multiplicand, multiplier):
-    m2 = min(len(str(multiplicand)), len(str(multiplier))) // 2  # m // 2
+    m2 = min(integer_digits_base256(multiplicand), integer_digits_base256(multiplier)) // 2  # m // 2
 
-    # Use hash map instead of repeatedly calculating powers of 10
+    # Use hash map instead of repeatedly calculating powers of number_base
     if m2 in karatsuba_split_inputs.power_map:
         m_digit_shift = karatsuba_split_inputs.power_map[m2][0]
         m2_digit_shift = karatsuba_split_inputs.power_map[m2][1]
     else:
-        m2_digit_shift = 10 ** m2
-        m_digit_shift = m2_digit_shift * m2_digit_shift  # 10 ** m = 10 ** (2 * m2) = (10 ** m2) ** 2
+        m2_digit_shift = 1 << (8 * m2)  # 1 << (8 * m2) = 2 ** (8 * m2) = 256 ** m2
+        m_digit_shift = 1 << (16 * m2)  # m2_digit_shift * m2_digit_shift
         karatsuba_split_inputs.power_map[m2] = (m_digit_shift, m2_digit_shift)
 
     high1 = multiplicand // m2_digit_shift
@@ -52,7 +66,7 @@ def karatsuba_multiply_iterative(multiplicand, multiplier):
         branch = current_node[2]
 
         # Note: every node here is guaranteed to have 3 children if it is not a leaf
-        if multiplicand_temp >= 10 and multiplier_temp >= 10:
+        if multiplicand_temp >= number_base and multiplier_temp >= number_base:
             intermediate_results = karatsuba_split_inputs(multiplicand_temp, multiplier_temp)
 
             m_digit_shift_temp = intermediate_results[0]
@@ -105,7 +119,7 @@ def karatsuba_multiply_iterative(multiplicand, multiplier):
 
 def karatsuba_multiply_recursive(multiplicand, multiplier):
     # Calculate multiplicand * multiplier
-    if multiplicand < 10 or multiplier < 10:
+    if multiplicand < number_base or multiplier < number_base:
         return multiplicand * multiplier
 
     intermediate_results = karatsuba_split_inputs(multiplicand, multiplier)
