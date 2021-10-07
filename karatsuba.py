@@ -24,15 +24,17 @@ def integer_digits_base256(number):
 def karatsuba_split_inputs(multiplicand, multiplier):
     m2 = min(integer_digits_base256(multiplicand), integer_digits_base256(multiplier)) >> 1  # m // 2
 
-    m2_digit_shift = 1 << (8 * m2)  # 1 << (8 * m2) = 2 ** (8 * m2) = 256 ** m2
-    m_digit_shift = 1 << (16 * m2)  # m2_digit_shift * m2_digit_shift
+    m2_digit_shift_bits = m2 << 3  # 8 * m2
+    m_digit_shift_bits = m2 << 4  # 16 * m2
+    m2_digit_shift = 1 << m2_digit_shift_bits  # 1 << (8 * m2) = 2 ** (8 * m2) = 256 ** m2
 
-    high1 = multiplicand // m2_digit_shift
+    # Split the numbers to have half of the number of digits in the shorter multi - divide and conquer
+    high1 = multiplicand >> m2_digit_shift_bits
     low1 = multiplicand % m2_digit_shift
-    high2 = multiplier // m2_digit_shift
+    high2 = multiplier >> m2_digit_shift_bits
     low2 = multiplier % m2_digit_shift
 
-    return [m_digit_shift, m2_digit_shift, high1, low1, high2, low2]
+    return [m_digit_shift_bits, m2_digit_shift_bits, high1, low1, high2, low2]
 
 
 def karatsuba_multiply_iterative(multiplicand, multiplier):
@@ -92,15 +94,15 @@ def karatsuba_multiply_iterative(multiplicand, multiplier):
             last_branch = branch_path.pop()
             m_pair = m_stack.pop()
 
-            m_digit_shift = m_pair[0]
-            m2_digit_shift = m_pair[1]
+            m_digit_shift_bits = m_pair[0]
+            m2_digit_shift_bits = m_pair[1]
 
             z0 = z_stack[0].pop()
             z1 = z_stack[1].pop()
             z2 = z_stack[2].pop()
 
             # print('z0 = ' + str(z0) + ' z1 = ' + str(z1) + ' z2 = ' + str(z2))
-            result = (z2 * m_digit_shift) + ((z1 - z2 - z0) * m2_digit_shift) + z0
+            result = (z2 << m_digit_shift_bits) + ((z1 - z2 - z0) << m2_digit_shift_bits) + z0
             z_stack[last_branch].append(result)
 
     # The final result is pushed onto the left z0 stack, so we return it here
@@ -114,8 +116,8 @@ def karatsuba_multiply_recursive(multiplicand, multiplier):
 
     intermediate_results = karatsuba_split_inputs(multiplicand, multiplier)
 
-    m_digit_shift = intermediate_results[0]
-    m2_digit_shift = intermediate_results[1]
+    m_digit_shift_bits = intermediate_results[0]
+    m2_digit_shift_bits = intermediate_results[1]
 
     high1 = intermediate_results[2]
     low1 = intermediate_results[3]
@@ -127,4 +129,4 @@ def karatsuba_multiply_recursive(multiplicand, multiplier):
     z2 = karatsuba_multiply_recursive(high1, high2)
 
     # print('z0 = ' + str(z0) + ' z1 = ' + str(z1) + ' z2 = ' + str(z2))
-    return (z2 * m_digit_shift) + ((z1 - z2 - z0) * m2_digit_shift) + z0
+    return (z2 << m_digit_shift_bits) + ((z1 - z2 - z0) << m2_digit_shift_bits) + z0
