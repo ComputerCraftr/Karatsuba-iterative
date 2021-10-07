@@ -26,13 +26,13 @@ def karatsuba_split_inputs(multiplicand, multiplier):
 
     m2_digit_shift_bits = m2 << 3  # 8 * m2
     m_digit_shift_bits = m2 << 4  # 16 * m2
-    m2_digit_shift = 1 << m2_digit_shift_bits  # 1 << (8 * m2) = 2 ** (8 * m2) = 256 ** m2
+    # 1 << (8 * m2) = 2 ** (8 * m2) = 256 ** m2
 
     # Split the numbers to have half of the number of digits in the shorter multi - divide and conquer
     high1 = multiplicand >> m2_digit_shift_bits
-    low1 = multiplicand % m2_digit_shift
+    low1 = multiplicand - (high1 << m2_digit_shift_bits)
     high2 = multiplier >> m2_digit_shift_bits
-    low2 = multiplier % m2_digit_shift
+    low2 = multiplier - (high2 << m2_digit_shift_bits)
 
     return [m_digit_shift_bits, m2_digit_shift_bits, high1, low1, high2, low2]
 
