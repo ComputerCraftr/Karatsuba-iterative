@@ -16,7 +16,7 @@ multi_list = []
 iterative_results = []
 recursive_results = []
 
-max_digits = 251
+max_digits = 801
 for j in range(2, max_digits, 1):
     multi_list.append([random.randint(10, 10 ** j), random.randint(10, 10 ** j)])
 
