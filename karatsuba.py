@@ -53,8 +53,8 @@ def karatsuba_multiply_iterative(multiplicand, multiplier):
     z_stack = [[], [], []]
     leaf_count = 0
 
-    # Perform the tree traversal and calculate the results - since the recursive Karatsuba multiplication function calls
-    # itself three times, this will be a ternary tree
+    # Perform the depth first tree traversal and calculate the results - since the recursive Karatsuba multiplication
+    # function calls itself three times, this will be a ternary tree
     while node_stack:
         current_node = node_stack.pop()
         multiplicand_temp = current_node[0]
