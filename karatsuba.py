@@ -22,16 +22,20 @@ def integer_digits_base256(number):
 
 
 def karatsuba_split_inputs(multiplicand, multiplier):
+    # m2 is half of the number of digits in the smaller multi
     m2 = min(integer_digits_base256(multiplicand), integer_digits_base256(multiplier)) >> 1  # m // 2
 
+    # Calculate powers of 256 to restore the proper number of digits to split numbers
     m2_digit_shift_bits = m2 << 3  # 8 * m2
     m_digit_shift_bits = m2 << 4  # 16 * m2
     # 1 << (8 * m2) = 2 ** (8 * m2) = 256 ** m2
 
-    # Split the numbers to have half of the number of digits in the shorter multi - divide and conquer
-    high1 = multiplicand >> m2_digit_shift_bits
-    low1 = multiplicand - (high1 << m2_digit_shift_bits)
+    # Split the numbers to have half of the number of digits in the smaller multi - divide and conquer
+    # Remove the low digits using truncated division or right shifts
+    high1 = multiplicand >> m2_digit_shift_bits  # multiplicand // 256 ** m2
     high2 = multiplier >> m2_digit_shift_bits
+    # Remove the high digits using modulo or subtraction
+    low1 = multiplicand - (high1 << m2_digit_shift_bits)  # multiplicand % 256 ** m2
     low2 = multiplier - (high2 << m2_digit_shift_bits)
 
     return [m_digit_shift_bits, m2_digit_shift_bits, high1, low1, high2, low2]
