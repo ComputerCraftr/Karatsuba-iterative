@@ -4,6 +4,8 @@ Copyright (c) 2021-2022 John "ComputerCraftr" Studnicka
 Iterative Karatsuba multiplication algorithm
 """
 
+from collections import deque
+
 number_base_bit_shift = 16
 number_base = 1 << number_base_bit_shift  # 65536
 
@@ -43,13 +45,13 @@ def karatsuba_split_inputs(multiplicand, multiplier):
 def karatsuba_multiply_iterative(multiplicand, multiplier):
     # The node stack holds the input arguments to the Karatsuba multiplication function along with the branch of each
     # node in the tree with respect to its parent
-    node_stack = [[multiplicand, multiplier, 0]]  # Assign root node with left branch 0
+    node_stack = deque([[multiplicand, multiplier, 0]])  # Assign root node with left branch 0
 
     # These stacks hold the results of lower depth calculations and maintain information about which higher order
     # calculations they belong to
-    branch_path = []
-    m_stack = []
-    z_stack = [[], [], []]
+    branch_path = deque()
+    m_stack = deque()
+    z_stack = [deque(), deque(), deque()]
     leaf_count = 0
 
     # Perform the depth first tree traversal and calculate the results - since the recursive Karatsuba multiplication
