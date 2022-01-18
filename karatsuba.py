@@ -1,41 +1,40 @@
 """
-Copyright (c) 2021 John "ComputerCraftr" Studnicka
-Distributed under the MIT software license, see the accompanying
-file COPYING or http://www.opensource.org/licenses/mit-license.php.
+Copyright (c) 2021-2022 John "ComputerCraftr" Studnicka
 
 Iterative Karatsuba multiplication algorithm
 """
 
-number_base = 256
+number_base_bit_shift = 16
+number_base = 1 << number_base_bit_shift  # 65536
 
 
-# Base 256 is one byte per digit
-def integer_digits_base256(number):
+# Base 65536 is two bytes per digit
+def integer_digits_base_n(number):
     digits = 0
 
-    # Divide by 256 until the number is rounded down to zero
+    # Divide by the base until the number is rounded down to zero
     while number > 0:
         digits += 1
-        number >>= 8  # Right shifting by 8 bits is equivalent to dividing by 256
+        number >>= number_base_bit_shift  # Right shifting by 16 bits is equivalent to dividing by 65536
 
     return digits
 
 
 def karatsuba_split_inputs(multiplicand, multiplier):
     # m2 is half of the number of digits in the smaller multi
-    m2 = min(integer_digits_base256(multiplicand), integer_digits_base256(multiplier)) >> 1  # m // 2
+    m2 = min(integer_digits_base_n(multiplicand), integer_digits_base_n(multiplier)) >> 1  # m // 2
 
-    # Calculate powers of 256 to restore the proper number of digits to split numbers
-    m2_digit_shift_bits = m2 << 3  # 8 * m2
-    m_digit_shift_bits = m2 << 4  # 16 * m2
-    # 1 << (8 * m2) = 2 ** (8 * m2) = 256 ** m2
+    # Calculate powers of the base to restore the proper number of digits to split numbers
+    m2_digit_shift_bits = m2 * number_base_bit_shift
+    m_digit_shift_bits = m2_digit_shift_bits << 1  # double m2 bits
+    # 1 << (16 * m2) = 2 ** (16 * m2) = 65536 ** m2
 
     # Split the numbers to have half of the number of digits in the smaller multi - divide and conquer
     # Remove the low digits using truncated division or right shifts
-    high1 = multiplicand >> m2_digit_shift_bits  # multiplicand // 256 ** m2
+    high1 = multiplicand >> m2_digit_shift_bits  # multiplicand // 65536 ** m2
     high2 = multiplier >> m2_digit_shift_bits
     # Remove the high digits using modulo or subtraction
-    low1 = multiplicand - (high1 << m2_digit_shift_bits)  # multiplicand % 256 ** m2
+    low1 = multiplicand - (high1 << m2_digit_shift_bits)  # multiplicand % 65536 ** m2
     low2 = multiplier - (high2 << m2_digit_shift_bits)
 
     return [m_digit_shift_bits, m2_digit_shift_bits, high1, low1, high2, low2]

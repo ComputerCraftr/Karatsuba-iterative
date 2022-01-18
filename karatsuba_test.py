@@ -1,7 +1,5 @@
 """
-Copyright (c) 2021 John "ComputerCraftr" Studnicka
-Distributed under the MIT software license, see the accompanying
-file COPYING or http://www.opensource.org/licenses/mit-license.php.
+Copyright (c) 2021-2022 John "ComputerCraftr" Studnicka
 
 Multiplication tests and benchmarks
 """
@@ -11,7 +9,7 @@ import random
 import time
 
 # Generate deterministic random testing data
-random.seed(1)
+random.seed(2)
 multi_list = []
 iterative_results = []
 recursive_results = []
